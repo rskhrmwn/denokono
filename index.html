@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="id"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Boss Battle: Raja Kiasan</title>
+<style>
+:root{--bg:#000;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+html,body{margin:0;height:100%;background:var(--bg);overflow:hidden;font-family:"Courier New",monospace;font-weight:900;user-select:none;-webkit-user-select:none;-webkit-tap-highlight-color:transparent;touch-action:manipulation}
+#g{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);overflow:hidden;background:#000}
+canvas{position:absolute;inset:0;width:100%;height:100%;image-rendering:pixelated}
+.scr{position:absolute;inset:0;display:none;flex-direction:column;align-items:center;justify-content:center;text-align:center;color:#fff;gap:1.2rem}
+.scr.on{display:flex}
+#play{display:none}#play.on{display:block}
+.t{text-shadow:.25rem .25rem 0 #000,-.2rem -.2rem 0 #000,.2rem -.2rem 0 #000,-.2rem .2rem 0 #000}
+h1{margin:0;line-height:1}
+.btn{border:.5rem solid #000;border-radius:1rem;box-shadow:0 .7rem 0 #000;color:#fff;font:inherit;font-weight:900;cursor:pointer;line-height:1.1}
+.btn:active{transform:translateY(.6rem);box-shadow:none}
+.btn:focus-visible,.ic:focus-visible{outline:.4rem solid #ffd23f}
+.go{padding:1.2rem 4rem;font-size:4.4rem;background:#12b34a}
+.box{background:#fff;color:#111;border:.6rem solid #000;border-radius:1.4rem;padding:1.5rem 3rem;font-size:3rem;max-width:70%;line-height:1.3}
+#hh{position:absolute;left:2%;top:2%;font-size:4.6rem;color:#ff3b4a;line-height:1}
+#sk{position:absolute;left:2%;top:13%;font-size:2.8rem;color:#ffd23f}
+#sn{position:absolute;left:0;right:0;top:2%;text-align:center;font-size:3rem;color:#fff}
+#bw{position:absolute;right:2%;top:14%;width:30%;text-align:right}
+#bl{font-size:2rem;color:#fff}
+#bt{height:2.6rem;background:#000;border:.4rem solid #fff}
+#bf{height:100%;width:100%;background:#e8262d;transition:width .5s}
+#bub{position:absolute;left:24%;width:46%;top:20%;min-height:22%;background:#fff;color:#111;border:.6rem solid #000;border-radius:1.4rem;padding:1.6rem 2rem;font-size:3.3rem;line-height:1.25;box-shadow:0 .8rem 0 #0006;display:flex;flex-direction:column;justify-content:center;text-align:center}
+#bub.ok{background:#c8ffd0}#bub.bad{background:#ffd3d3}
+#bub small{display:block;font-size:2.4rem;margin-top:.8rem;font-weight:700}
+#ans{position:absolute;left:6%;right:6%;bottom:7%;height:17%;display:flex;gap:3%}
+#ans .btn{flex:1;font-size:3.8rem}
+#ans .m{font-size:2.6rem;padding:.4rem}
+#nx{position:absolute;left:25%;right:25%;bottom:7%;height:17%;background:#12b34a;font-size:4.4rem;display:none}
+#ib{position:absolute;top:2%;right:2%;display:flex;gap:1rem;z-index:9}
+.ic{width:6rem;height:6rem;font-size:3.2rem;border-radius:1rem;background:#fff;border:.4rem solid #000;cursor:pointer;padding:0}
+#wm{position:absolute;right:2%;bottom:1%;font-size:1.9rem;color:#fff;opacity:.85;pointer-events:none;z-index:9}
+#rot{position:fixed;inset:0;background:#1a0f3a;color:#fff;display:none;z-index:99;flex-direction:column;align-items:center;justify-content:center;font-size:7vw;text-align:center;gap:3vw}
+@media (prefers-reduced-motion:reduce){#bf{transition:none}}
+</style></head><body>
+<div id="g"><canvas id="cv" width="320" height="180"></canvas>
+<div id="title" class="scr on">
+<div class="t" style="font-size:2.6rem;color:#ffd23f;margin-top:9%">GIM BAHASA INDONESIA • KELAS 6 SD</div>
+<h1 class="t" style="font-size:6.6rem;color:#ffd23f">BOSS BATTLE</h1>
+<h1 class="t" style="font-size:6.6rem;color:#d98cff">RAJA KIASAN</h1>
+<div class="t" style="font-size:2.6rem">🔵 D = Makna ASLI &nbsp; 🔴 K = Makna KIASAN</div>
+<button class="btn go" id="st1">▶ MULAI</button>
+<div class="t" id="bs" style="font-size:2.2rem;color:#ffd23f"></div></div>
+<div id="intro" class="scr"></div>
+<div id="play" class="scr"><div id="hh" class="t"></div><div id="sn" class="t"></div><div id="sk" class="t"></div>
+<div id="bw"><div id="bl" class="t">RAJA KIASAN</div><div id="bt"><div id="bf"></div></div></div>
+<div id="bub"></div><div id="ans"></div><button id="nx" class="btn">LANJUT ▶</button></div>
+<div id="end" class="scr"></div>
+<div id="ib"><button class="ic" id="fs" aria-label="Layar penuh">⛶</button><button class="ic" id="mt" aria-label="Suara">🔊</button></div>
+<div id="wm" class="t">© Riski Hermawan</div></div>
+<div id="rot"><div style="font-size:14vw">📱↻</div><div>Putar HP kamu ke posisi LANDSCAPE ya!</div></div>
+<script>
+var $=function(i){return document.getElementById(i)},X=$('cv').getContext('2d'),G='#ffd23f';
+var S=[
+{n:"TANGAN KANAN",tip:"Tangan kanan bisa berarti tangan asli, atau ORANG KEPERCAYAAN.",q:[
+["Tangan kananku gatal karena digigit nyamuk.","D","Tangan benar-benar bagian tubuh."],
+["Pak Budi adalah tangan kanan kepala desa.","K","Artinya orang kepercayaan."],
+["Ayah memotong kuku tangan kanannya.","D","Tangan kanan yang asli."],
+["Dina menjadi tangan kanan ketua kelas.","K","Artinya orang kepercayaan."]]},
+{n:"BUNGA",tip:"Bunga bisa berarti tanaman, atau GADIS IDAMAN / CANTIK.",q:[
+["Bunga mawar itu mekar di taman.","D","Bunga tanaman yang asli."],
+["Nisa menjadi bunga desa karena kebaikannya.","K","Artinya gadis idaman di desa."],
+["Ibu menyiram bunga melati di halaman.","D","Bunga tanaman yang asli."],
+["Gadis itu dijuluki bunga kampus.","K","Artinya gadis cantik idaman kampus."]]},
+{n:"MAKAN",tip:"Makan bisa berarti menelan makanan, atau BOROS / menghabiskan banyak.",q:[
+["Adik sedang makan nasi goreng.","D","Makan sungguhan."],
+["Sepeda motor ini sangat makan bensin.","K","Artinya boros bensin."],
+["Kakak makan apel setiap pagi.","D","Makan sungguhan."],
+["Mobil tua itu makan banyak biaya.","K","Artinya menghabiskan banyak biaya."]]},
+{n:"MEJA HIJAU",tip:"Meja hijau bisa berarti meja berwarna hijau, atau PENGADILAN.",q:[
+["Ayah membeli meja hijau untuk di teras.","D","Meja yang berwarna hijau."],
+["Kasus pencurian itu dibawa ke meja hijau.","K","Artinya pengadilan."],
+["Kami duduk di meja hijau kantin sekolah.","D","Meja yang berwarna hijau."],
+["Perkara itu akhirnya sampai ke meja hijau.","K","Artinya sampai ke pengadilan."]]},
+{n:"DETEKTIF KALIMAT",tip:"Campuran semua kata! Pakai trik: ganti dengan arti aslinya. Kalau jadi aneh, itu K!",q:[
+["Kakak membeli bunga melati untuk ibu.","D","Bunga tanaman yang asli."],
+["Sepeda itu makan banyak tenaga saat menanjak.","K","Artinya menghabiskan banyak tenaga."],
+["Ayah mengecat meja di teras dengan warna hijau.","D","Meja berwarna hijau."],
+["Hakim memutuskan perkara itu di meja hijau.","K","Artinya di pengadilan."],
+["Rani menggambar tangan kanannya di buku.","D","Tangan yang asli."]]},
+{n:"PILIH MAKNA",tip:"Sekarang pilih arti kiasan yang paling tepat dari 3 pilihan!",q:[
+["Pak Budi tangan kanan kepala desa. Artinya...",["orang kepercayaan","tangan yang sangat kuat","tangan kanan yang sakit"],0,"Tangan kanan = orang kepercayaan."],
+["Nisa bunga desa. Artinya...",["gadis idaman desa","bunga di taman desa","penjual bunga"],0,"Bunga desa = gadis idaman."],
+["Motor ini makan bensin. Artinya...",["boros bensin","motor suka makan","bensinnya enak"],0,"Makan bensin = boros bensin."],
+["Kasus itu dibawa ke meja hijau. Artinya...",["dibawa ke pengadilan","dibawa ke taman","dibawa ke toko meja"],0,"Meja hijau = pengadilan."]]},
+{n:"BOSS TERAKHIR",tip:"Pertarungan final melawan Raja Kiasan! Jawab semua dengan teliti!",q:[
+["Ia mencuci tangan kanannya sebelum makan.","D","Tangan dan makan yang asli."],
+["Pak Hadi adalah tangan kanan Pak Lurah.","K","Artinya orang kepercayaan."],
+["Bunga desa itu ramah kepada semua orang.","K","Artinya gadis idaman desa."],
+["Kucing itu makan ikan goreng.","D","Makan sungguhan."],
+["Mesin tua itu makan listrik terlalu banyak.","K","Artinya boros listrik."],
+["Kasus itu akhirnya masuk meja hijau.","K","Artinya masuk pengadilan."]]}];
+var TH=[['#5ec3ff','#d2813f','#4cae4c','#7a3f12'],['#9be7ff','#c9894a','#7bd36b','#7a4a1a'],['#ffb36b','#b5651d','#c28f4a','#5c3a1a'],['#6ab0ff','#9aa4b8','#5b8fd1','#4b5568'],['#1b1b4b','#6b4fa0','#2d2b6b','#2a1a4a'],['#2ec4b6','#c68b3e','#1f9d8f','#6a3d12'],['#2b0f4d','#5b3a8a','#3a1666','#1d0b36']];
+var st=0,mode='t',qs,cur,lives=3,sc=0,scS=0,ts=0,cor=0,tot=0,streak=0,lock=0,dead=0,T=0,atk=0,shk=0,hurt=0,fl=0,P=[];
+function R(x,y,w,h,c){X.fillStyle=c;X.fillRect(x,y,w,h)}
+function sh(a){for(var i=a.length,j,t;i>1;){j=Math.random()*i|0;i--;t=a[i];a[i]=a[j];a[j]=t}return a}
+function dito(x,y){X.save();X.translate(x,y);X.scale(3,3);
+R(3,0,10,4,'#8b5a2b');R(3,0,10,1,'#5c3a1a');R(2,3,12,2,'#5c3a1a');
+R(3,5,10,7,'#000');R(4,5,8,6,'#ffd3a0');R(5,6,2,3,'#000');R(9,6,2,3,'#000');R(5,6,1,1,'#fff');R(9,6,1,1,'#fff');R(7,10,2,1,'#c0392b');
+R(3,12,10,2,'#e02020');R(10,13,2,4,'#e02020');
+R(2,14,12,7,'#000');R(3,14,10,6,'#f5e6b8');R(7,15,1,1,G);R(7,17,1,1,G);R(7,19,1,1,G);
+R(4,20,3,3,'#1e3a8a');R(9,20,3,3,'#1e3a8a');R(3,23,4,1,'#000');R(8,23,4,1,'#000');
+R(-3,14,5,7,'#000');R(-2,15,3,5,'#dc2626');R(-2,16,1,3,'#fff');R(-1,17,1,1,'#fff');R(0,16,1,1,'#fff');R(0,18,1,1,'#fff');
+R(12,16,2,3,'#f5e6b8');R(14,5,2,12,'#000');R(14,6,2,10,'#9ad0ff');R(14,6,1,10,'#fff');R(13,17,4,1,G);R(14,18,2,2,'#5c3a1a');
+X.restore()}
+function raja(x,y,s){X.save();X.translate(x,y);X.scale(s||3,s||3);
+R(1,17,20,13,'#000');R(2,18,18,11,'#5b21b6');R(5,17,12,2,'#fff');R(10,19,2,10,G);R(2,28,18,1,'#3b0f7a');
+R(5,4,12,10,'#000');R(6,5,10,8,'#f1c27d');R(8,7,2,2,'#facc15');R(13,7,2,2,'#facc15');R(7,6,3,1,'#000');R(12,6,3,1,'#000');
+R(5,11,12,7,'#000');R(6,11,10,6,'#fff');R(9,12,4,1,'#c0392b');
+R(6,2,10,3,G);R(6,0,2,2,G);R(10,0,2,2,G);R(14,0,2,2,G);R(10,3,2,1,'#e11d48');
+R(22,8,2,22,'#8b5a2b');R(20,3,6,6,'#000');R(21,4,4,4,'#a855f7');R(22,5,2,1,'#fff');R(23,6,1,1,'#fff');R(22,7,1,1,'#fff');
+X.restore()}
+function bg(){var m=mode=='t'?6:st,h=TH[m],i,x,y;R(0,0,320,180,h[0]);
+if(m>=4)for(i=0;i<25;i++)R((i*97)%320,(i*53)%100,2,2,Math.sin(T*3+i)>0?'#fff':'#889');
+if(m==6){R(120,64,80,78,'#1d0b36');R(110,44,16,98,'#1d0b36');R(194,44,16,98,'#1d0b36');R(150,80,6,10,G);R(166,80,6,10,G);R(116,60,4,6,G);R(200,60,4,6,G)}
+for(i=0;i<4;i++){x=((i*110-T*8)%360+360)%360-40;R(x,24+i*9,40,10,'#fffd');R(x+8,18+i*9,24,8,'#fffd')}
+for(x=0;x<320;x+=16){y=18+Math.round(8*Math.sin(x/40+m));R(x,142-y,16,y,h[2])}
+R(0,142,320,38,h[3]);for(y=145;y<180;y+=12)for(x=((y/12|0)%2)*16;x<320;x+=32)R(x,y,30,10,h[1]);
+R(0,142,320,3,'#0006');
+y=108+Math.round(Math.sin(T*2)*3);R(148,y,18,18,'#000');R(150,y+2,14,14,G);R(155,y+4,4,2,'#000');R(157,y+6,2,3,'#000');R(155,y+11,3,2,'#000');
+R(182,y+3,(Math.abs(Math.sin(T*4))*8+2)|0,12,G)}
+function lp(ts){T=ts/1000;bg();
+var ax=atk>0?Math.sin((1-atk/14)*Math.PI)*70:0;if(atk>0)atk--;
+var hx=hurt>0?Math.random()*6-3:0;if(hurt>0)hurt--;
+dito(24+ax+hx,70+Math.round(Math.sin(T*5)*1.5));
+if(!dead){var sx=shk>0?Math.random()*8-4:0;if(shk>0)shk--;var s=(mode=='p'&&st==6)||mode=='t'?3:3;raja(228+sx,52+Math.round(Math.sin(T*3)*2),s)}
+if(atk>4&&atk<10)for(var i=0;i<8;i++){R(205+i*4,56+i*6,5,4,'#fff');R(208+i*4,56+i*6,3,3,G)}
+if(mode=='t'){R(143,6,30,9,G);R(143,0,6,6,G);R(155,0,6,6,G);R(167,0,6,6,G);R(155,9,6,4,'#e11d48')}
+for(i=P.length-1;i>=0;i--){var p=P[i];p.x+=p.vx;p.vy+=.2;p.y+=p.vy;if(--p.l<0){P.splice(i,1);continue}R(p.x,p.y,3,3,p.c)}
+if(st==6&&mode=='p'&&Math.random()<.012)fl=8;
+if(fl>0){X.globalAlpha=fl/16;R(0,0,320,180,'#fff');X.globalAlpha=1;fl--}
+requestAnimationFrame(lp)}
+function burst(x,y,n,cs){for(var i=0;i<n;i++)P.push({x:x,y:y,vx:Math.random()*8-4,vy:-Math.random()*4-1,l:30+Math.random()*25,c:cs[i%cs.length]})}
+/* audio */
+var AC,mg,mu,song,nt,tm,muted=0;
+function A(){if(!AC){AC=new(window.AudioContext||window.webkitAudioContext)();mg=AC.createGain();mg.gain.value=.5;mg.connect(AC.destination)}if(AC.state=='suspended')AC.resume()}
+function tn(f,t,d,ty,v,o){var a=AC.createOscillator(),g=AC.createGain();a.type=ty;a.frequency.value=f;g.gain.setValueAtTime(v,t);g.gain.exponentialRampToValueAtTime(.001,t+d);a.connect(g);g.connect(o||mg);a.start(t);a.stop(t+d+.02)}
+function mf(n){return 440*Math.pow(2,(n-69)/12)}
+var SG=[{b:150,l:[72,-1,74,76,79,-1,76,74,72,-1,79,-1,77,76,74,-1,71,-1,72,74,76,-1,79,81,79,-1,76,-1,74,72,67,-1],s:[48,-1,55,-1,48,-1,55,-1,53,-1,60,-1,53,-1,60,-1,43,-1,50,-1,43,-1,50,-1,48,-1,55,-1,48,-1,55,-1]},
+{b:170,l:[69,-1,72,69,76,-1,75,-1,76,-1,72,-1,69,-1,68,-1,67,-1,71,67,74,-1,73,-1,74,72,71,69,68,-1,64,-1],s:[45,-1,45,-1,45,-1,45,-1,41,-1,41,-1,41,-1,41,-1,43,-1,43,-1,43,-1,43,-1,44,-1,44,-1,40,-1,40,-1]}];
+function sm(){song=null;clearTimeout(tm);if(mu){try{mu.disconnect()}catch(e){}}}
+function pm(k,tr){if(!AC)return;sm();mu=AC.createGain();mu.connect(mg);song=[k,tr];nt=AC.currentTime+.05;sch()}
+function sch(){if(!song)return;var q=SG[song[0]],d=60/q.b/2,i,t;for(i=0;i<32;i++){t=nt+i*d;if(q.l[i]>=0)tn(mf(q.l[i]+song[1]),t,d*1.4,'square',.07,mu);if(q.s[i]>=0)tn(mf(q.s[i]+song[1]),t,d*1.8,'triangle',.18,mu);if(i%2==0)tn(6000,t,.02,'square',.012,mu)}nt+=32*d;tm=setTimeout(sch,Math.max(50,(nt-AC.currentTime-.3)*1000))}
+function sfx(a,ty,gap,d){if(!AC)return;var t=AC.currentTime;a.forEach(function(n,i){tn(mf(n),t+i*gap,d,ty||'square',.13)})}
+var FX={coin:function(){sfx([83,88],'square',.08,.25)},bad:function(){sfx([57,50],'sawtooth',.16,.3)},hit:function(){sfx([86,80,74,68,62],'square',.025,.05)},win:function(){sfx([72,76,79,84,79,84,88],'square',.11,.3)},lose:function(){sfx([60,57,55,52],'sawtooth',.22,.35)},go:function(){sfx([67,72,76,79],'square',.08,.2)}};
+/* game */
+function go(id){['title','intro','play','end'].forEach(function(e){$(e).classList.toggle('on',e==id)})}
+function intro(){mode='i';dead=0;go('intro');var s=S[st];
+$('intro').innerHTML='<div class="t" style="font-size:3.6rem;color:#ffd23f">LEVEL '+(st+1)+' DARI '+S.length+'</div><h1 class="t" style="font-size:7rem">'+s.n+'</h1><div class="box">'+s.tip+'</div><div class="t" style="font-size:2.6rem">'+s.q.length+' soal • ❤ x3 nyawa</div><button class="btn go" id="ib2">MAIN! ▶</button>';
+$('ib2').onclick=begin;pm(st==5?1:0,[0,2,4,0,2,-1,0][st])}
+function begin(){A();FX.go();mode='p';dead=0;qs=sh(S[st].q.slice());tot=qs.length;cor=0;lives=3;streak=0;scS=sc;
+if(st==5)pm(1,0);go('play');nq()}
+function hud(){$('hh').textContent='♥'.repeat(lives)+'♡'.repeat(3-lives);$('sk').textContent='SKOR '+sc;$('sn').textContent='LEVEL '+(st+1)+' • '+S[st].n;$('bf').style.width=(100-cor/tot*100)+'%'}
+function nq(){cur=qs.shift();lock=0;var b=$('bub'),a=$('ans'),mc=cur.length==4;b.className='';b.textContent=cur[0];
+if(!mc)a.innerHTML='<button class="btn" data-ok="'+(cur[1]=='D'?1:0)+'" style="background:#1d6bff">D<br>MAKNA ASLI</button><button class="btn" data-ok="'+(cur[1]=='K'?1:0)+'" style="background:#e8262d">K<br>MAKNA KIASAN</button>';
+else{var cl=['#7c3aed','#d97706','#0d9488'];a.innerHTML=sh(cur[1].map(function(t,i){return[t,i==cur[2]]})).map(function(o,i){return'<button class="btn m" data-ok="'+(o[1]?1:0)+'" style="background:'+cl[i]+'">'+o[0]+'</button>'}).join('')}
+a.style.display='flex';$('nx').style.display='none';hud()}
+$('ans').onclick=function(e){var b=e.target.closest('button');if(b)an(b.dataset.ok=='1')};
+function an(ok){if(lock)return;lock=1;$('ans').style.display='none';var b=$('bub'),mc=cur.length==4,ex=cur[cur.length-1];
+if(!mc)ex='Ini '+(cur[1]=='D'?'DENOTATIF (makna asli). ':'KONOTATIF (makna kiasan). ')+ex;
+if(ok){cor++;streak++;sc+=100+(streak>2?50:0);atk=14;FX.coin();setTimeout(function(){shk=18;fl=5;FX.hit();burst(240,90,18,[G,'#fff','#ff7a1a'])},180);
+b.className='ok';b.innerHTML='<b>✔ BENAR!'+(streak>2?' COMBO x'+streak:'')+'</b><small>'+ex+'</small>'}
+else{lives--;streak=0;hurt=18;fl=10;FX.bad();qs.push(cur);b.className='bad';b.innerHTML='<b>✖ BELUM TEPAT</b><small>'+ex+' Nanti diulang ya!</small>'}
+hud();$('nx').style.display='block'}
+$('nx').onclick=function(){if(lives<=0)return fin(0);if(cor>=tot)return fin(1);nq()};
+function fin(w){sm();$('nx').style.display='none';
+if(w){FX.win();dead=1;burst(250,90,60,['#5b21b6',G,'#fff','#a855f7']);ts+=lives;setTimeout(function(){en(1)},1100)}
+else{FX.lose();setTimeout(function(){en(0)},600)}}
+function en(w){go('end');var h,sv;try{sv=Math.max(+localStorage.rk||0,sc);localStorage.rk=sv}catch(e){}
+if(!w){sc=scS;h='<h1 class="t" style="font-size:9rem;color:#ff5a5a">GAME OVER</h1><div class="box">Jangan menyerah, Detektif Dito! Coba lagi ya.</div><button class="btn go" id="eb" style="background:#e8262d">ULANGI LEVEL ↻</button>';$('end').innerHTML=h;$('eb').onclick=begin;pm(1,0);return}
+if(st<S.length-1){h='<h1 class="t" style="font-size:7.5rem;color:#ffd23f">LEVEL SELESAI!</h1><div class="t" style="font-size:8rem">'+'⭐'.repeat(lives)+'☆'.repeat(3-lives)+'</div><div class="box">Skor: '+sc+'</div><button class="btn go" id="eb">LEVEL BERIKUTNYA ▶</button>';$('end').innerHTML=h;$('eb').onclick=function(){st++;intro()};pm(0,4)}
+else{var mx=S.length*3,rk=ts>=mx-3?'DETEKTIF LEGENDA':ts>=mx-9?'DETEKTIF HEBAT':'DETEKTIF PEMULA';
+h='<h1 class="t" style="font-size:7.5rem;color:#ffd23f">KAMU MENANG! 🏆</h1><div class="box">Pangkat: '+rk+'<br>Bintang: '+ts+'/'+mx+' • Skor: '+sc+'</div><div class="t" style="font-size:2.6rem">Denotatif = Makna ASLI • Konotatif = Makna KIASAN</div><button class="btn go" id="eb">MAIN LAGI ↻</button>';
+$('end').innerHTML=h;$('eb').onclick=function(){st=0;sc=0;ts=0;intro()};pm(0,2)}}
+$('st1').onclick=function(){A();FX.go();intro()};
+$('mt').onclick=function(){A();muted=!muted;mg.gain.value=muted?0:.5;$('mt').textContent=muted?'🔇':'🔊'};
+$('fs').onclick=function(){var d=document.documentElement;try{if(document.fullscreenElement)document.exitFullscreen();else{(d.requestFullscreen||d.webkitRequestFullscreen).call(d);screen.orientation.lock('landscape').catch(function(){})}}catch(e){}};
+document.addEventListener('visibilitychange',function(){if(AC)document.hidden?AC.suspend():AC.resume()});
+function rs(){var W=innerWidth,H=innerHeight,w=Math.min(W,H*16/9),g=$('g');g.style.width=w+'px';g.style.height=w*9/16+'px';document.documentElement.style.fontSize=w/100+'px';$('rot').style.display=H>W?'flex':'none'}
+addEventListener('resize',rs);rs();
+try{$('bs').textContent=localStorage.rk?'SKOR TERBAIK: '+localStorage.rk:''}catch(e){}
+requestAnimationFrame(lp);
+</script></body></html>
